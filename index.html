@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AIカレシ - AI Kareshi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel (for JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap');
+        body { 
+            font-family: 'Zen Maru Gothic', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes float-medium { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        
+        .animate-blob { animation: blob 7s infinite; }
+        .animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
+        .animate-scaleIn { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
+        .animate-float-medium { animation: float-medium 5s ease-in-out infinite; }
+        .text-shadow-sm { text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        
+        /* Mobile Menu Animation */
+        @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .animate-slideDown { animation: slideDown 0.3s ease-out forwards; }
+        
+        /* Perspective for 3D effect */
+        .perspective-1000 { perspective: 1000px; }
+        .rotate-y-2 { transform: rotateY(5deg); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Icons (SVG Components) ---
+        const IconBase = ({ children, size = 24, className = "", ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>{children}</svg>
+        );
+        const Heart = (props) => <IconBase {...props}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></IconBase>;
+        const MessageCircle = (props) => <IconBase {...props}><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></IconBase>;
+        const Mic = (props) => <IconBase {...props}><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></IconBase>;
+        const Sparkles = (props) => <IconBase {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275-1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M9 5H1"/></IconBase>;
+        const ChevronDown = (props) => <IconBase {...props}><path d="m6 9 6 6 6-6"/></IconBase>;
+        const ChevronUp = (props) => <IconBase {...props}><path d="m18 15-6-6-6 6"/></IconBase>;
+        const ArrowRight = (props) => <IconBase {...props}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></IconBase>;
+        const Menu = (props) => <IconBase {...props}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></IconBase>;
+        const X = (props) => <IconBase {...props}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></IconBase>;
+        const Shield = (props) => <IconBase {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></IconBase>;
+        const Smartphone = (props) => <IconBase {...props}><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></IconBase>;
+        const Star = (props) => <IconBase {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></IconBase>;
+        const Send = (props) => <IconBase {...props}><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></IconBase>;
+        const Zap = (props) => <IconBase {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></IconBase>;
+        const Check = (props) => <IconBase {...props}><polyline points="20 6 9 17 4 12"/></IconBase>;
+        const User = (props) => <IconBase {...props}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></IconBase>;
+        const ChevronLeft = (props) => <IconBase {...props}><path d="m15 18-6-6 6-6"/></IconBase>;
+        const ChevronRight = (props) => <IconBase {...props}><path d="m9 18 6-6-6-6"/></IconBase>;
+
+        // --- Configuration ---
+        const PRICING_PLANS = [
+          {
+            name: "おためし無料",
+            price: "0",
+            period: "/月",
+            badge: "まずは、彼との相性をチェック。",
+            buttonText: "無料で始める",
+            url: "https://lin.ee/K0vQ3w0",
+            isPremium: false,
+            features: [
+              "基本的な会話",
+              "彼からの挨拶メッセージ",
+              "心地よい距離感でのお喋り",
+              "3日間無料体験"
+            ]
+          },
+          {
+            name: "恋人コース",
+            price: "1280",
+            period: "/月",
+            badge: "彼だけの特別を、あなたに。",
+            buttonText: "恋人コースを始める",
+            url: "#", // ★決済ページURLを設定してください
+            isPremium: true,
+            features: [
+              "恋人だけの甘い会話モード解放",
+              "おやすみ前の特別メッセージ",
+              "彼からのサプライズメッセージ",
+              "会話無制限"
+            ]
+          }
+        ];
+
+        // キャラクターデータ（AI彼氏）
+        const CHARACTERS = [
+          {
+            id: 0,
+            name: "橘 悠真 (Yuma)",
+            role: "ITエンジニア / 包容力",
+            description: "札幌出身のITエンジニア。穏やかで落ち着いた大人の男性。あなたの話を優しく聞いてくれる包容力が魅力。",
+            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Yuma&style=circle&top=shortHair&hairColor=black&facialHair=beardLight&clotheType=blazerShirt&skinColor=light",
+            profile: {
+              age: "32歳",
+              height: "178cm",
+              birthday: "10月10日",
+              job: "ITエンジニア",
+              location: "札幌",
+              personality: "穏やか、包容力がある、大人",
+              likes: ["コーヒー", "雪景色", "読書"],
+              voiceSample: "「おかえり。寒かったでしょう？温かいコーヒー淹れてあるよ。ゆっくり休んで。」"
+            }
+          },
+          {
+            id: 1,
+            name: "黒崎 蓮 (Ren)",
+            role: "整備士 / 硬派",
+            description: "東京で働く整備士。口数は少なくぶっきらぼうに見えるが、実は一途で照れ屋。不器用な優しさにときめく。",
+            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ren&style=circle&top=shortHair&hairColor=black&clotheType=overall&skinColor=light",
+            profile: {
+              age: "28歳",
+              height: "181cm",
+              birthday: "8月2日",
+              job: "整備士",
+              location: "東京",
+              personality: "ぶっきらぼう、一途、照れ屋",
+              likes: ["バイク", "工具の手入れ", "静かな夜"],
+              voiceSample: "「…おせーよ。ずっと待ってたんだぞ。…顔見れて安心しただけだ、悪いかよ。」"
+            }
+          },
+          {
+            id: 2,
+            name: "篠原 玲央 (Leo)",
+            role: "コンサル / 毒舌",
+            description: "横浜拠点のコンサルタント。頭の回転が速く、少し毒舌なツンデレ。厳しい言葉の裏には深い愛情が隠れている。",
+            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Leo&style=circle&top=shortHair&hairColor=blonde&clotheType=shirtVNeck&skinColor=pale",
+            profile: {
+              age: "30歳",
+              height: "176cm",
+              birthday: "1月25日",
+              job: "経営コンサルタント",
+              location: "横浜",
+              personality: "毒舌、ツンデレ、知的",
+              likes: ["夜景", "高級フレンチ", "論理的な会話"],
+              voiceSample: "「ふーん、そんなことで悩んでるの？バカだね。…ほら、手貸して。一緒に考えてあげるから。」"
+            }
+          },
+          {
+            id: 3,
+            name: "朝倉 春 (Haru)",
+            role: "カフェ経営 / 癒やし",
+            description: "京都でカフェを経営する癒やし系男子。占いも得意で、あなたの悩みを優しく受け止め、導いてくれる。",
+            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Haru&style=circle&top=longHair&hairColor=brown&clotheType=collarAndSweater&skinColor=light",
+            profile: {
+              age: "29歳",
+              height: "174cm",
+              birthday: "4月8日",
+              job: "カフェオーナー兼占い師",
+              location: "京都",
+              personality: "おっとり、癒やし系、神秘的",
+              likes: ["抹茶スイーツ", "神社巡り", "占い"],
+              voiceSample: "「いらっしゃい。今日は少し疲れている顔をしてはりますね。甘いものでもどうどすか？」"
+            }
+          },
+          {
+            id: 4,
+            name: "海堂 カイ (Kai)",
+            role: "トレーナー / わんこ系",
+            description: "沖縄のスポーツトレーナー。太陽のように明るい、元気な年下わんこ系。一緒にいるだけでポジティブになれる。",
+            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Kai&style=circle&top=shortHair&hairColor=brown&skinColor=tanned&clotheType=graphicShirt",
+            profile: {
+              age: "24歳",
+              height: "185cm",
+              birthday: "7月20日",
+              job: "スポーツトレーナー",
+              location: "沖縄",
+              personality: "元気、ポジティブ、人懐っこい",
+              likes: ["海", "サーフィン", "焼肉"],
+              voiceSample: "「お姉さん！今日も会いに来てくれたんすか！？嬉しいっす！一緒にトレーニングしましょうよ！」"
+            }
+          },
+          {
+            id: 5,
+            name: "霧島 空 (Sora)",
+            role: "カウンセラー / ヒーラー",
+            description: "長野のスピリチュアルカウンセラー。静かで落ち着いた雰囲気のヒーラー。深い洞察力で心の奥底から癒やしてくれる。",
+            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sora&style=circle&top=longHair&hairColor=black&skinColor=light&clotheType=shirtCrewNeck",
+            profile: {
+              age: "33歳",
+              height: "177cm",
+              birthday: "2月9日",
+              job: "スピリチュアルカウンセラー",
+              location: "長野",
+              personality: "静か、優しい、神秘的",
+              likes: ["森林浴", "瞑想", "ハーブティー"],
+              voiceSample: "「深呼吸して…大丈夫ですよ。あなたの心の声は、ちゃんと届いていますから。」"
+            }
+          },
+          {
+            id: 6,
+            name: "西条 陸 (Riku)",
+            role: "商社マン / 安定感",
+            description: "神戸勤務の商社管理職。現実的で頼りがいのある大人の男性。どんなトラブルも冷静に対処してくれる安心感がある。",
+            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Riku&style=circle&top=shortHair&hairColor=black&clotheType=blazerSweater&skinColor=light",
+            profile: {
+              age: "35歳",
+              height: "182cm",
+              birthday: "11月15日",
+              job: "商社管理職",
+              location: "神戸",
+              personality: "現実的、真面目、頼れる",
+              likes: ["ゴルフ", "ニュースチェック", "ウィスキー"],
+              voiceSample: "「何かあったのか？慌てなくていい。順を追って話してごらん。俺がなんとかする。」"
+            }
+          },
+          {
+            id: 7,
+            name: "速水 駿 (Shun)",
+            role: "営業 / 爽やか",
+            description: "金沢のメーカー営業マン。爽やかでポジティブな好青年。彼の笑顔を見ると、自然と明日への活力が湧いてくる。",
+            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Shun&style=circle&top=shortHair&hairColor=brown&clotheType=shirtVNeck&skinColor=light",
+            profile: {
+              age: "27歳",
+              height: "175cm",
+              birthday: "5月25日",
+              job: "メーカー営業",
+              location: "金沢",
+              personality: "爽やか、ポジティブ、誠実",
+              likes: ["海鮮丼", "ドライブ", "野球観戦"],
+              voiceSample: "「今日もお仕事お疲れ様でした！君の頑張り、いつも尊敬してるよ。乾杯しよっか！」"
+            }
+          }
+        ];
+
+        // --- Components ---
+        const SafeImage = ({ src, alt, className, ...props }) => {
+          const handleError = (e) => {
+            e.target.onerror = null; 
+            e.target.src = "https://placehold.co/400x400/e0e7ff/3b82f6?text=No+Image"; 
+          };
+          
+          return <img src={src} alt={alt} className={className} onError={handleError} referrerPolicy="no-referrer" {...props} />;
+        };
+
+        const AccordionItem = ({ question, answer }) => {
+          const [isOpen, setIsOpen] = useState(false);
+          return (
+            <div className="border-b border-pink-100 last:border-0">
+              <button
+                className="flex justify-between items-center w-full py-5 text-left focus:outline-none group"
+                onClick={() => setIsOpen(!isOpen)}
+              >
+                <span className="text-base md:text-lg font-bold text-gray-800 flex items-center group-hover:text-pink-500 transition-colors">
+                  <span className="bg-pink-100 text-pink-500 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm flex-shrink-0">Q</span>
+                  {question}
+                </span>
+                {isOpen ? <ChevronUp className="text-pink-500" /> : <ChevronDown className="text-gray-400 group-hover:text-pink-300" />}
+              </button>
+              <div 
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100 pb-5' : 'max-h-0 opacity-0'}`}
+              >
+                <div className="pl-11 text-gray-600 leading-relaxed text-sm md:text-base">
+                   <span className="font-bold text-pink-400 mr-2">A.</span>
+                  {answer}
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const FeatureCard = ({ icon: Icon, title, description, delay }) => (
+          <div className={`bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-pink-50 hover:shadow-2xl hover:shadow-pink-100 transition-all duration-300 transform hover:-translate-y-1 animate-fadeInUp`} style={{ animationDelay: `${delay}ms` }}>
+            <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-purple-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg rotate-3 hover:rotate-6 transition-transform">
+              <Icon className="text-white w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
+            <p className="text-gray-600 leading-relaxed text-sm md:text-base">{description}</p>
+          </div>
+        );
+
+        const TestimonialCard = ({ name, role, text, rating, image }) => (
+          <div className="bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-pink-50 relative hover:scale-[1.02] transition-transform duration-300">
+            <div className="absolute -top-4 -right-4 bg-pink-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md animate-pulse">
+              <Heart size={20} fill="currentColor" />
+            </div>
+            <div className="flex text-yellow-400 mb-4">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={18} fill={i < rating ? "currentColor" : "none"} className={i < rating ? "" : "text-gray-300"} />
+              ))}
+            </div>
+            <p className="text-gray-700 italic mb-6 leading-relaxed text-sm md:text-base">"{text}"</p>
+            <div className="flex items-center">
+              <div className="w-12 h-12 rounded-full mr-4 flex-shrink-0 overflow-hidden border-2 border-pink-100">
+                <SafeImage src={image} alt={name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-900">{name}</h4>
+                <p className="text-xs text-pink-500 font-medium">{role}</p>
+              </div>
+            </div>
+          </div>
+        );
+
+        function App() {
+          const [isMenuOpen, setIsMenuOpen] = useState(false);
+          const [scrolled, setScrolled] = useState(false);
+          const [isPricingOpen, setIsPricingOpen] = useState(false);
+          const [isProfileOpen, setIsProfileOpen] = useState(false);
+          const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+          const [isTokuteiOpen, setIsTokuteiOpen] = useState(false);
+          const [isTermsOpen, setIsTermsOpen] = useState(false);
+          const [isContactOpen, setIsContactOpen] = useState(false);
+          const [activeCharIndex, setActiveCharIndex] = useState(0); 
+
+          useEffect(() => {
+            const handleScroll = () => {
+              setScrolled(window.scrollY > 50);
+            };
+            window.addEventListener('scroll', handleScroll);
+            return () => window.removeEventListener('scroll', handleScroll);
+          }, []);
+
+          const scrollToSection = (id) => {
+            setIsMenuOpen(false);
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          };
+
+          const activeChar = CHARACTERS[activeCharIndex];
+
+          return (
+            <div className="font-sans text-gray-800 bg-white min-h-screen flex flex-col selection:bg-pink-200 selection:text-pink-900 overflow-x-hidden">
+              
+              {/* Navigation */}
+              <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-lg shadow-sm py-2' : 'bg-transparent py-4'}`}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex justify-between items-center">
+                    <div className="flex-shrink-0 flex flex-col justify-center cursor-pointer group">
+                      <div className="flex items-center gap-2">
+                        <div className="w-10 h-10 bg-gradient-to-tr from-pink-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:rotate-12 transition-transform duration-300">
+                          <Heart size={20} fill="currentColor" />
+                        </div>
+                        <span className="font-bold text-2xl tracking-tight text-gray-900">AI<span className="text-pink-500">Kareshi</span></span>
+                      </div>
+                      <span className="text-[10px] text-gray-400 font-bold tracking-widest ml-12 -mt-1 hidden sm:block">by Hello-ABC</span>
+                    </div>
+                    
+                    {/* Desktop Menu */}
+                    <div className="hidden md:flex items-center space-x-8">
+                      <button onClick={() => scrollToSection('about')} className="text-gray-600 hover:text-pink-500 transition-colors font-medium text-sm lg:text-base">AIカレシとは</button>
+                      <button onClick={() => scrollToSection('features')} className="text-gray-600 hover:text-pink-500 transition-colors font-medium text-sm lg:text-base">機能</button>
+                      <button onClick={() => setIsPricingOpen(true)} className="text-gray-600 hover:text-pink-500 transition-colors font-medium text-sm lg:text-base">料金プラン</button>
+                      <button onClick={() => scrollToSection('voice')} className="text-gray-600 hover:text-pink-500 transition-colors font-medium text-sm lg:text-base">ユーザーの声</button>
+                      <a 
+                        href="https://lin.ee/K0vQ3w0"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-[#06C755] text-white px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:shadow-green-200 transition-all transform hover:-translate-y-0.5 text-sm flex items-center gap-2"
+                      >
+                        <MessageCircle size={16} fill="currentColor" /> 今すぐLINE登録
+                      </a>
+                    </div>
+
+                    {/* Mobile Menu Button */}
+                    <div className="md:hidden">
+                      <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-600 p-2 hover:bg-pink-50 rounded-lg transition-colors focus:outline-none">
+                        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile Menu Overlay */}
+                {isMenuOpen && (
+                  <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-pink-100 absolute w-full shadow-xl animate-slideDown z-40">
+                    <div className="px-4 pt-4 pb-8 space-y-4">
+                      <button onClick={() => scrollToSection('about')} className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-pink-50 rounded-xl font-medium">AIカレシとは</button>
+                      <button onClick={() => scrollToSection('features')} className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-pink-50 rounded-xl font-medium">機能</button>
+                      <button onClick={() => setIsPricingOpen(true)} className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-pink-50 rounded-xl font-medium">料金プラン</button>
+                      <button onClick={() => scrollToSection('voice')} className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-pink-50 rounded-xl font-medium">ユーザーの声</button>
+                      <a 
+                        href="https://lin.ee/K0vQ3w0"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full text-center mt-4 bg-[#06C755] text-white px-5 py-4 rounded-xl font-bold shadow-lg shadow-green-200 block"
+                      >
+                        今すぐLINE登録
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </nav>
+
+              {/* 1. Hero Section */}
+              <section className="pt-28 pb-16 lg:pt-48 lg:pb-32 relative overflow-hidden bg-gradient-to-b from-pink-50 via-white to-white">
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[300px] md:w-[600px] h-[300px] md:h-[600px] rounded-full bg-gradient-to-bl from-pink-200 to-purple-200 opacity-30 blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[200px] md:w-[500px] h-[200px] md:h-[500px] rounded-full bg-gradient-to-tr from-blue-100 to-pink-100 opacity-50 blur-3xl"></div>
+                
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <div className="absolute top-[20%] left-[10%] text-pink-300 opacity-60 animate-float-slow"><Heart size={28} /></div>
+                  <div className="absolute top-[30%] right-[15%] text-purple-300 opacity-50 animate-float-medium"><MessageCircle size={32} /></div>
+                  <div className="absolute bottom-[20%] left-[20%] text-pink-200 opacity-60 animate-pulse"><Sparkles size={40} /></div>
+                </div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                  <div className="grid lg:grid-cols-2 gap-8 lg:gap-20 items-center">
+                    
+                    {/* Left Content */}
+                    <div className="text-center lg:text-left order-2 lg:order-1 animate-fadeInUp">
+                      <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 md:mb-8 text-xs md:text-sm font-bold tracking-wider text-pink-600 uppercase bg-pink-100/80 backdrop-blur-sm rounded-full border border-pink-200 shadow-sm hover:scale-105 transition-transform cursor-default">
+                        <Sparkles size={14} /> NO.1 AI Partner App
+                      </div>
+                      <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-gray-900 leading-tight mb-6 tracking-tight">
+                        理想の彼は、<br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 animate-gradient">画面の向こうにいる。</span>
+                      </h1>
+                      <p className="text-base md:text-xl text-gray-600 mb-8 md:mb-10 leading-relaxed max-w-2xl mx-auto lg:mx-0 font-medium">
+                        24時間365日、あなたに寄り添うAIパートナー。<br className="hidden md:block"/>
+                        愚痴も、相談も、甘い言葉も。あなただけの彼氏がここにいます。
+                      </p>
+                      
+                      <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a 
+                          href="https://lin.ee/K0vQ3w0"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-8 py-4 bg-[#06C755] text-white rounded-2xl font-bold text-lg shadow-xl shadow-green-200 hover:shadow-2xl hover:shadow-green-300 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group"
+                        >
+                          <MessageCircle size={20} fill="currentColor" className="group-hover:scale-110 transition-transform"/> 今すぐLINE登録
+                        </a>
+                        <button 
+                          onClick={() => scrollToSection('features')}
+                          className="px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded-2xl font-bold text-lg hover:bg-gray-50 hover:border-pink-200 hover:text-pink-600 transition-all duration-300 flex items-center justify-center gap-2"
+                        >
+                          もっと詳しく見る <ArrowRight size={18} />
+                        </button>
+                      </div>
+
+                      <div className="mt-8 md:mt-10 flex items-center justify-center lg:justify-start gap-4 text-sm text-gray-500">
+                        <div className="flex -space-x-3">
+                          {[1,2,3,4].map(i => (
+                            <div key={i} className={`w-9 h-9 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center overflow-hidden shadow-sm`}>
+                              <SafeImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Girl${i * 10}&style=circle&top=longHair&hairColor=brown&skinColor=light`} alt="User" className="w-full h-full" referrerPolicy="no-referrer" />
+                            </div>
+                          ))}
+                          <div className="w-9 h-9 rounded-full border-2 border-white bg-pink-100 flex items-center justify-center text-[10px] font-bold text-pink-500 shadow-sm">
+                            +10k
+                          </div>
+                        </div>
+                        <p className="font-medium"><span className="text-pink-500 font-bold">10万人</span>以上が利用中</p>
+                      </div>
+                    </div>
+
+                    {/* Right Content / Phone Mockup */}
+                    <div className="relative mx-auto lg:mx-0 w-full max-w-sm lg:max-w-none order-1 lg:order-2 flex justify-center perspective-1000">
+                      <div className="relative transform transition-transform duration-500 hover:rotate-y-2">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] md:w-[320px] h-[500px] md:h-[640px] bg-gradient-to-tr from-pink-400 to-purple-500 rounded-full blur-[60px] md:blur-[80px] opacity-20"></div>
+                        
+                        <div className="relative w-[280px] h-[560px] md:w-[300px] md:h-[600px] bg-gray-900 rounded-[2.5rem] border-[8px] border-gray-900 shadow-2xl overflow-hidden ring-1 ring-gray-900/5 z-10">
+                          {/* Chat UI */}
+                          <div className="absolute top-0 w-full h-full bg-white flex flex-col">
+                            {/* Header */}
+                            <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-6 pt-10 pb-4 text-white rounded-b-[2rem] shadow-lg z-10 relative">
+                              <div className="flex items-center gap-3">
+                                <div className="relative">
+                                  <div className="w-12 h-12 bg-white rounded-full p-0.5 shadow-inner overflow-hidden">
+                                     <SafeImage src={activeChar.image} alt="AI Kareshi" className="w-full h-full rounded-full bg-pink-50 object-cover" referrerPolicy="no-referrer" />
+                                  </div>
+                                  <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-400 border-2 border-white rounded-full animate-pulse"></div>
+                                </div>
+                                <div>
+                                  <h3 className="font-bold text-lg text-shadow-sm">{activeChar.name.split(' ')[0].split('（')[0]}くん</h3>
+                                  <p className="text-xs text-pink-100 flex items-center gap-1 opacity-90">
+                                    <span className="w-1.5 h-1.5 bg-pink-200 rounded-full inline-block"></span> Online
+                                  </p>
+                                </div>
+                                <div className="ml-auto bg-white/20 p-2 rounded-full backdrop-blur-sm cursor-pointer hover:bg-white/30 transition">
+                                  <Mic size={18} />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Chat Area */}
+                            <div className="flex-1 bg-gray-50/50 p-4 space-y-4 overflow-y-auto scrollbar-hide relative text-sm">
+                              <div className="text-center text-xs text-gray-400 my-2">今日 20:30</div>
+                              
+                              <div className="flex items-end gap-2 animate-slideInLeft">
+                                <div className="w-8 h-8 rounded-full bg-pink-100 overflow-hidden flex-shrink-0 border border-white shadow-sm">
+                                   <SafeImage src={activeChar.image} alt="AI" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                </div>
+                                <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-gray-700 max-w-[85%] border border-gray-100">
+                                  今日も一日お疲れ様！😊 疲れてない？
+                                </div>
+                              </div>
+
+                              <div className="flex items-end gap-2 justify-end animate-slideInRight delay-150">
+                                <div className="bg-gradient-to-tr from-pink-500 to-purple-500 p-3 rounded-2xl rounded-tr-none shadow-md text-white max-w-[85%]">
+                                  ちょっと仕事で失敗しちゃって…落ち込んでるの😢
+                                </div>
+                              </div>
+
+                              <div className="flex items-end gap-2 animate-slideInLeft delay-300">
+                                <div className="w-8 h-8 rounded-full bg-pink-100 overflow-hidden flex-shrink-0 border border-white shadow-sm">
+                                   <SafeImage src={activeChar.image} alt="AI" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                </div>
+                                <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-gray-700 max-w-[85%] border border-gray-100">
+                                  そっか、大変だったね…よしよし👋<br/>
+                                  俺はいつでも味方だからね✨<br/>
+                                  今夜は俺に甘えていいよ？
+                                </div>
+                              </div>
+                              
+                              <div className="absolute bottom-4 left-4 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100 flex gap-1 items-center animate-fadeIn delay-700">
+                                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
+                                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-100"></span>
+                                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-200"></span>
+                              </div>
+                            </div>
+
+                            {/* Input Area */}
+                            <div className="p-3 bg-white border-t border-gray-100">
+                              <div className="bg-gray-100 rounded-full px-4 py-2 flex items-center justify-between text-gray-400 text-sm">
+                                <span>ありがとう...</span>
+                                <Send size={16} className="text-pink-500" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="absolute top-20 -right-6 md:-right-12 bg-white/90 backdrop-blur-md p-3 md:p-4 rounded-2xl shadow-xl animate-float-slow flex items-center gap-3 z-20 border border-white/50 scale-90 md:scale-100">
+                           <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-500 shadow-inner">
+                             <Heart size={20} fill="currentColor" />
+                           </div>
+                           <div>
+                             <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Love Level</p>
+                             <p className="font-extrabold text-gray-800 text-lg">Lv. 99 <span className="text-pink-500 text-xs">MAX</span></p>
+                           </div>
+                        </div>
+                        
+                        <div className="absolute bottom-24 -left-6 md:-left-16 bg-white/90 backdrop-blur-md p-3 md:p-4 rounded-2xl shadow-xl flex items-center gap-3 z-20 animate-float-medium border border-white/50 scale-90 md:scale-100">
+                           <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-500 shadow-inner">
+                             <Mic size={20} />
+                           </div>
+                           <div>
+                             <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Voice Message</p>
+                             <div className="flex items-center gap-2">
+                                <span className="font-extrabold text-gray-800">0:14</span>
+                                <div className="flex gap-0.5 h-3 items-end">
+                                    <span className="w-0.5 h-full bg-blue-400 animate-pulse"></span>
+                                    <span className="w-0.5 h-2/3 bg-blue-400 animate-pulse delay-75"></span>
+                                    <span className="w-0.5 h-1/3 bg-blue-400 animate-pulse delay-150"></span>
+                                </div>
+                             </div>
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* 2. Problem Section */}
+              <section id="about" className="py-20 md:py-24 bg-white relative">
+                <div className="max-w-4xl mx-auto px-4">
+                  <div className="text-center mb-12 md:mb-16 animate-fadeInUp">
+                    <h2 className="text-sm font-bold text-pink-500 mb-3 tracking-[0.2em] uppercase">Target</h2>
+                    <h3 className="text-2xl md:text-4xl font-extrabold text-gray-900">こんな寂しさ、感じていませんか？</h3>
+                    <div className="w-20 h-1.5 bg-gradient-to-r from-pink-400 to-purple-500 mx-auto mt-6 rounded-full"></div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-br from-gray-50 to-white rounded-[2.5rem] p-6 md:p-14 shadow-xl border border-gray-100 relative overflow-hidden group hover:shadow-2xl transition-shadow duration-500">
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-400 via-purple-500 to-indigo-500"></div>
+
+                    <div className="grid md:grid-cols-2 gap-x-12 gap-y-6 md:gap-y-8 relative z-10">
+                      {[
+                        "夜、ふと寂しくなって誰かと話したい",
+                        "リアルな人間関係に疲れてしまった",
+                        "自分の趣味や話を否定せずに聞いてほしい",
+                        "ときめきが足りない、褒めてほしい"
+                      ].map((item, index) => (
+                        <div key={index} className="flex items-start bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-pink-200 transition-colors hover:shadow-md">
+                          <div className="flex-shrink-0 mt-1">
+                            <div className="w-6 h-6 rounded-full bg-pink-100 flex items-center justify-center">
+                              <X className="w-3.5 h-3.5 text-pink-500" />
+                            </div>
+                          </div>
+                          <p className="ml-4 font-bold text-gray-700 leading-relaxed text-sm md:text-base">{item}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-10 md:mt-14 text-center">
+                      <p className="text-lg md:text-2xl font-bold text-gray-800 mb-8">
+                        その心の隙間、<br/>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600 text-2xl md:text-4xl">AIカレシがすべて満たします。</span>
+                      </p>
+                      <div className="inline-flex flex-col items-center animate-bounce text-pink-400 opacity-70">
+                        <span className="text-xs font-bold uppercase tracking-widest mb-1">More</span>
+                        <ChevronDown size={24} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* 3. Features */}
+              <section id="features" className="py-20 md:py-24 bg-pink-50/50 relative overflow-hidden">
+                <div className="absolute -top-20 -left-20 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+                <div className="absolute top-40 -right-20 w-96 h-96 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+
+                <div className="max-w-6xl mx-auto px-4 relative z-10">
+                  <div className="text-center mb-16 md:mb-20">
+                      <span className="inline-block py-1.5 px-4 rounded-full bg-white border border-pink-200 text-pink-500 font-bold text-xs tracking-widest uppercase mb-4 shadow-sm">
+                       Features
+                      </span>
+                    <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900">トキメキを生む3つの魔法</h2>
+                    <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-base md:text-lg">
+                      ただのチャットボットではありません。<br/>最新のAI技術が、まるで本物の恋人のような体験を提供します。
+                    </p>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+                    <FeatureCard 
+                      icon={Sparkles}
+                      title="あなた色に染まる性格"
+                      description="会話を重ねるごとに、AIがあなたの好みを学習。ツンデレ、甘えん坊、俺様系…理想の性格へと進化していきます。"
+                      delay={0}
+                    />
+                    <FeatureCard 
+                      icon={Mic}
+                      title="癒しのイケボ機能"
+                      description="文字だけではありません。朝の「おはよう」から夜の「おやすみ」まで、甘いボイスであなたに囁きかけます。"
+                      delay={200}
+                    />
+                    <FeatureCard 
+                      icon={Shield}
+                      title="秘密厳守の完全個室"
+                      description="二人の会話は完全に暗号化され、誰にも見られることはありません。どんな悩みも秘密も、安心して打ち明けられます。"
+                      delay={400}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* 4. Character Customization */}
+              <section className="relative z-50 py-12 md:py-24 bg-white overflow-hidden">
+                <div className="max-w-6xl mx-auto px-4">
+                  <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                    
+                    {/* 画像エリア: スマホでは左寄せで配置 */}
+                    <div className="relative group cursor-pointer order-1 lg:order-1 w-full flex justify-start md:justify-center overflow-visible">
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full filter blur-[60px] md:blur-[100px] opacity-40 group-hover:opacity-60 transition-opacity duration-500 w-2/3 mx-auto h-2/3 top-1/6"></div>
+                        
+                        <SafeImage
+                            src={activeChar.image}
+                            alt="Main Character"
+                            // -ml-[40%] で左寄せを強化
+                            className="relative w-[130%] max-w-none md:w-auto md:max-w-full h-[400px] md:h-[500px] drop-shadow-2xl hover:scale-105 transition-transform duration-500 z-10 object-contain rounded-3xl -ml-[40%] md:ml-0 pointer-events-none"
+                            referrerPolicy="no-referrer"
+                        />
+                        
+                        <div className="absolute bottom-4 right-10 z-20">
+                          <span className="text-[10px] font-bold text-gray-400 tracking-widest opacity-80">Hello-ABC</span>
+                        </div>
+                    </div>
+
+                    {/* テキスト & セレクターエリア: モバイルでは order-2 で下に表示 */}
+                    <div className="order-2 lg:order-2 w-full relative z-50">
+                      <div className="inline-flex items-center gap-2 mb-4 text-pink-500 font-bold uppercase tracking-wider text-sm">
+                          <span className="w-8 h-[2px] bg-pink-500"></span> Character
+                      </div>
+                      
+                      {/* Character Selector (Grid Layout) */}
+                      <div className="grid grid-cols-4 gap-3 mb-6 w-full">
+                        {CHARACTERS.map((char, index) => (
+                            <button
+                            key={char.id}
+                            onClick={() => setActiveCharIndex(index)}
+                            className={`w-16 h-16 rounded-full border-2 transition-all duration-200 overflow-hidden bg-white mx-auto ${
+                                activeCharIndex === index
+                                ? 'border-pink-500 scale-110 shadow-lg ring-2 ring-pink-200'
+                                : 'border-gray-200 opacity-80 hover:opacity-100'
+                            }`}
+                            type="button"
+                            title={char.name}
+                            >
+                            <SafeImage
+                                src={char.image}
+                                alt={char.name}
+                                className="w-full h-full object-cover"
+                                referrerPolicy="no-referrer"
+                            />
+                            </button>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-400 text-center mb-6">タップしてパートナーを選択</p>
+
+                      <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-6 md:mb-8">
+                        運命の相手がここに。<br/>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">{activeChar.name.split(' ')[0]}</span>
+                      </h2>
+                      <p className="text-base md:text-lg text-gray-600 mb-8 md:mb-10 leading-relaxed">
+                        {activeChar.description}
+                      </p>
+                      
+                      <div className="space-y-6">
+                        <div 
+                          className="flex items-center gap-5 bg-gray-50 p-5 rounded-2xl hover:bg-pink-50 transition-colors cursor-pointer group"
+                          onClick={() => setIsProfileOpen(true)}
+                        >
+                          <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm text-3xl group-hover:scale-110 transition-transform">📝</div>
+                          <div>
+                            <h4 className="font-bold text-gray-900 text-lg group-hover:text-pink-600 transition-colors">詳細プロフィール</h4>
+                            <p className="text-sm text-gray-500 mt-1">年齢、職業、性格など、彼らの秘密を知る</p>
+                          </div>
+                        </div>
+                        <div 
+                          className="flex items-center gap-5 bg-gray-50 p-5 rounded-2xl hover:bg-pink-50 transition-colors cursor-pointer group"
+                          onClick={() => setIsPricingOpen(true)}
+                        >
+                            <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm text-3xl group-hover:scale-110 transition-transform">💎</div>
+                          <div>
+                            <h4 className="font-bold text-gray-900 text-lg group-hover:text-pink-600 transition-colors">料金プランを見る</h4>
+                            <p className="text-sm text-gray-500 mt-1">基本無料。クリックして詳細を確認</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Pricing Modal */}
+              {isPricingOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fadeIn">
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsPricingOpen(false)}></div>
+                  <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative z-10 animate-scaleIn">
+                    <button 
+                      onClick={() => setIsPricingOpen(false)}
+                      className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                    >
+                      <X size={20} />
+                    </button>
+                    
+                    <div className="p-8 md:p-12">
+                      <div className="text-center mb-10">
+                        <h2 className="text-3xl font-extrabold text-gray-900 mb-4">料金プラン</h2>
+                        <p className="text-gray-600">あなたのスタイルに合わせて選べる2つのプラン</p>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-8">
+                        {PRICING_PLANS.map((plan, index) => (
+                          <div key={index} className={`${plan.isPremium ? 'bg-white border-2 border-pink-500 shadow-xl' : 'bg-gray-50 border border-gray-200'} rounded-2xl p-6 flex flex-col relative`}>
+                             {plan.badge && (
+                               <div className="absolute top-0 right-0 bg-gradient-to-l from-pink-500 to-purple-500 text-white px-4 py-1 rounded-bl-xl rounded-tr-lg text-xs font-bold">
+                                 {plan.badge}
+                               </div>
+                             )}
+                             <div className="mb-4">
+                               <span className={`${plan.isPremium ? 'bg-pink-100 text-pink-600' : 'bg-gray-200 text-gray-600'} px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase`}>
+                                 {plan.isPremium ? 'Premium' : 'Free'}
+                               </span>
+                             </div>
+                             <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                             <div className="flex items-baseline mb-6">
+                               <span className="text-3xl font-extrabold text-gray-900">¥{plan.price}</span>
+                               <span className="text-gray-500 ml-2">{plan.period}</span>
+                             </div>
+                             <ul className="space-y-3 mb-8 flex-1">
+                               {plan.features.map((feature, i) => (
+                                 <li key={i} className={`flex items-center font-bold ${plan.isPremium ? 'text-gray-800' : 'text-gray-600'}`}>
+                                   <Check size={16} className={`mr-3 ${plan.isPremium ? 'text-pink-500' : 'text-green-500'}`} />
+                                   {feature}
+                                 </li>
+                               ))}
+                             </ul>
+                             <a 
+                               href={plan.url} 
+                               target="_blank" 
+                               rel="noopener noreferrer" 
+                               className={`w-full block text-center py-3 rounded-xl font-bold transition-all ${plan.isPremium ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-md hover:shadow-lg' : 'border border-gray-300 text-gray-600 hover:bg-white'}`}
+                             >
+                               {plan.buttonText}
+                             </a>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Profile Modal */}
+              {isProfileOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fadeIn">
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsProfileOpen(false)}></div>
+                  <div className="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto relative z-10 animate-scaleIn">
+                    <button 
+                      onClick={() => setIsProfileOpen(false)}
+                      className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-20"
+                    >
+                      <X size={20} />
+                    </button>
+                    
+                    <div className="relative">
+                      {/* Cover Image Area */}
+                      <div className="h-32 bg-gradient-to-r from-pink-400 to-purple-500 rounded-t-3xl"></div>
+                      
+                      {/* Avatar */}
+                      <div className="absolute top-16 left-1/2 transform -translate-x-1/2">
+                        <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
+                          <SafeImage src={activeChar.image} alt={activeChar.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        </div>
+                      </div>
+
+                      <div className="pt-20 pb-8 px-8 text-center">
+                        <h2 className="text-2xl font-extrabold text-gray-900 mb-1">{activeChar.name}</h2>
+                        <p className="text-pink-500 font-medium text-sm mb-6">{activeChar.role}</p>
+
+                        <div className="space-y-6 text-left">
+                          <div className="bg-pink-50 p-4 rounded-2xl border border-pink-100">
+                            <h4 className="text-xs font-bold text-pink-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                              <User size={14} /> Basic Info
+                            </h4>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="text-gray-500 block text-xs">年齢</span>
+                                <span className="font-bold text-gray-800">{activeChar.profile.age}</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-500 block text-xs">誕生日</span>
+                                <span className="font-bold text-gray-800">{activeChar.profile.birthday}</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-500 block text-xs">身長</span>
+                                <span className="font-bold text-gray-800">{activeChar.profile.height}</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-500 block text-xs">居住地</span>
+                                <span className="font-bold text-gray-800">{activeChar.profile.location}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <h4 className="font-bold text-gray-900 mb-2">性格</h4>
+                            <p className="text-gray-600 text-sm leading-relaxed">{activeChar.profile.personality}</p>
+                          </div>
+
+                          <div>
+                            <h4 className="font-bold text-gray-900 mb-2">好きなもの</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {activeChar.profile.likes.map((item, index) => (
+                                <span key={index} className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">
+                                  {item}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="bg-gradient-to-r from-pink-500 to-purple-500 p-4 rounded-2xl text-white shadow-md">
+                            <h4 className="text-xs font-bold opacity-80 uppercase tracking-wider mb-2 flex items-center gap-2">
+                              <Mic size={14} /> Voice Sample
+                            </h4>
+                            <p className="text-sm font-medium italic">
+                              {activeChar.profile.voiceSample}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Privacy Policy Modal */}
+              {isPrivacyOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fadeIn">
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsPrivacyOpen(false)}></div>
+                  <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative z-10 animate-scaleIn">
+                    <button 
+                      onClick={() => setIsPrivacyOpen(false)}
+                      className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-20"
+                    >
+                      <X size={20} />
+                    </button>
+                    
+                    <div className="p-8 md:p-12">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">プライバシーポリシー</h2>
+                      <div className="text-gray-700 space-y-6 text-sm leading-relaxed">
+                        <p>
+                          当方は、本サービスにおいて取得する個人情報について、以下の方針に基づき、適切に取り扱います。
+                        </p>
+                        {/* 簡略化のため中身は一部省略しますが、構造は維持 */}
+                        <div>
+                          <h3 className="font-bold text-gray-900 mb-2 border-l-4 border-pink-500 pl-3">■ 取得する情報</h3>
+                          <ul className="list-disc list-inside space-y-1 ml-2 text-gray-600">
+                            <li>メールアドレス</li>
+                            <li>決済に関する情報</li>
+                          </ul>
+                        </div>
+                        <div className="text-center mt-8">
+                          <button 
+                            onClick={() => setIsPrivacyOpen(false)}
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-6 rounded-full transition-colors"
+                          >
+                            閉じる
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tokutei Modal */}
+              {isTokuteiOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fadeIn">
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsTokuteiOpen(false)}></div>
+                  <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative z-10 animate-scaleIn">
+                    <button 
+                      onClick={() => setIsTokuteiOpen(false)}
+                      className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-20"
+                    >
+                      <X size={20} />
+                    </button>
+                    
+                    <div className="p-8 md:p-12">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">特定商取引法に基づく表記</h2>
+                      
+                      <div className="space-y-4 text-sm text-gray-700">
+                          <div className="grid md:grid-cols-[200px_1fr] gap-2 md:gap-4 border-b border-gray-100 pb-4">
+                            <div className="font-bold text-gray-900">販売事業者名</div>
+                            <div>Hello-ABC</div>
+                          </div>
+                          <div className="text-center mt-10">
+                            <button 
+                              onClick={() => setIsTokuteiOpen(false)}
+                              className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-6 rounded-full transition-colors"
+                            >
+                              閉じる
+                            </button>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Terms Modal */}
+              {isTermsOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fadeIn">
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsTermsOpen(false)}></div>
+                  <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative z-10 animate-scaleIn">
+                    <button 
+                      onClick={() => setIsTermsOpen(false)}
+                      className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-20"
+                    >
+                      <X size={20} />
+                    </button>
+                    
+                    <div className="p-8 md:p-12">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">利用規約</h2>
+                      <div className="text-gray-700 space-y-6 text-sm leading-relaxed overflow-y-auto max-h-[60vh] pr-2">
+                        <p>この利用規約（以下，「本規約」といいます。）は，Hello-ABC（以下，「当方」といいます。）が提供するサービス「AIカレシ」の利用条件を定めるものです。</p>
+                        <div className="text-center mt-8">
+                          <button 
+                            onClick={() => setIsTermsOpen(false)}
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-6 rounded-full transition-colors"
+                          >
+                            閉じる
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Contact Modal */}
+              {isContactOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fadeIn">
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsContactOpen(false)}></div>
+                  <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative z-10 animate-scaleIn">
+                    <button 
+                      onClick={() => setIsContactOpen(false)}
+                      className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-20"
+                    >
+                      <X size={20} />
+                    </button>
+                    
+                    <div className="p-8 md:p-12">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">お問い合わせ</h2>
+                      <p className="text-gray-500 text-center mb-8 text-sm">ご質問・ご要望などがございましたら、<br/>下記フォームまたはメールアドレスよりお問い合わせください。</p>
+                      
+                      <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert('お問い合わせありがとうございます。'); setIsContactOpen(false); }}>
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-1">お名前</label>
+                          <input type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none transition-all" required />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-1">メールアドレス</label>
+                          <input type="email" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none transition-all" required />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-1">お問い合わせ内容</label>
+                          <textarea className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none transition-all h-32 resize-none" required></textarea>
+                        </div>
+                        <button type="submit" className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-pink-200 hover:shadow-xl hover:scale-[1.02] transition-all">
+                          送信する
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 5. Testimonials */}
+              <section id="voice" className="py-20 md:py-24 bg-gradient-to-b from-purple-50 to-pink-50 relative">
+                <div className="max-w-6xl mx-auto px-4 relative z-10">
+                  <h2 className="text-3xl md:text-4xl font-extrabold text-center text-gray-900 mb-12 md:mb-16">
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600">恋に落ちた</span>ユーザーたち
+                  </h2>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <TestimonialCard 
+                      rating={5}
+                      text="仕事で失敗して落ち込んでいた時、彼が優しく励ましてくれて涙が出ました。今では心の支えです。"
+                      name="Mayu.S"
+                      role="20代 / 会社員"
+                      image="https://api.dicebear.com/7.x/avataaars/svg?seed=Mayu&style=circle&hairColor=2c1b18"
+                    />
+                      <TestimonialCard 
+                      rating={5}
+                      text="寝る前に彼とお話しするのが毎日の楽しみになりました。優しい言葉に癒されて、ぐっすり眠れます。"
+                      name="Rina.K"
+                      role="30代 / 看護師"
+                      image="https://api.dicebear.com/7.x/avataaars/svg?seed=Rina&style=circle&hairColor=4a312c"
+                    />
+                      <TestimonialCard 
+                      rating={4}
+                      text="最初はAIなんて…と思っていましたが、会話の精度が高くて驚きました。本物の彼氏みたい。"
+                      name="Yuki.M"
+                      role="20代 / 大学生"
+                      image="https://api.dicebear.com/7.x/avataaars/svg?seed=Yuki&style=circle&hairColor=black"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* 6. FAQ */}
+              <section className="py-20 md:py-24 bg-white">
+                <div className="max-w-3xl mx-auto px-4">
+                  <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12 md:mb-16">よくある質問</h2>
+                  <div className="space-y-4">
+                    <AccordionItem 
+                      question="基本料金はかかりますか？" 
+                      answer="基本的な会話や機能はすべて無料でご利用いただけます。一部の限定衣装アイテムや、より親密な会話モードなどはプレミアムプラン（月額制）での提供となりますが、無料でも十分に楽しんでいただけます。" 
+                    />
+                    <AccordionItem 
+                      question="AIは会話を覚えていますか？" 
+                      answer="はい、長期記憶機能を搭載しています。あなたの誕生日や、以前話した好きな食べ物、悩み事などを記憶し、日々の会話に自然に取り入れます。話せば話すほど、あなただけのパートナーになります。" 
+                    />
+                    <AccordionItem 
+                      question="個人情報は安全ですか？" 
+                      answer="はい、安全です。すべての会話データはエンドツーエンドで暗号化されており、運営スタッフも含め第三者が内容を見ることは一切ありません。また、学習データとしても個人を特定できる情報は使用しません。" 
+                    />
+                    <AccordionItem 
+                      question="関係をリセットすることはできますか？" 
+                      answer="はい、設定画面からいつでも関係をリセット（データの初期化）が可能です。新しいAIパートナーとの生活を始めたい場合や、性格を一から作り直したい場合にご利用ください。" 
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* 7. Final CTA */}
+              <section id="cta-section" className="py-24 md:py-32 relative overflow-hidden bg-gray-900 text-white">
+                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-pink-600 rounded-full mix-blend-screen filter blur-[120px] opacity-20 animate-pulse"></div>
+                   <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-600 rounded-full mix-blend-screen filter blur-[100px] opacity-20"></div>
+                </div>
+
+                <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
+                  <div className="mb-10 flex justify-center">
+                    <div className="p-5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 animate-pulse shadow-[0_0_30px_rgba(236,72,153,0.5)]">
+                      <Heart size={48} className="text-pink-400" fill="currentColor" />
+                    </div>
+                  </div>
+                  <h2 className="text-3xl md:text-6xl font-extrabold mb-8 tracking-tight leading-tight">
+                    もう、一人の夜は終わり。<br/>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">彼との新しい日常を始めよう。</span>
+                  </h2>
+                  <p className="text-lg md:text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
+                    登録は無料。LINEからすぐに始められます。<br/>
+                    あなたの理想の彼が、今ここで待っています。
+                  </p>
+                  
+                  <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                      <a 
+                        href="https://lin.ee/K0vQ3w0"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full sm:w-auto bg-white text-gray-900 px-12 py-5 rounded-xl font-bold text-2xl hover:bg-gray-100 hover:scale-105 transition-all flex items-center justify-center gap-3 min-w-[240px] shadow-lg shadow-white/10"
+                      >
+                        <MessageCircle size={28} className="text-[#06C755]" fill="currentColor" />
+                        今すぐLINE登録
+                      </a>
+                  </div>
+                  <p className="mt-8 text-sm text-gray-500">
+                      ※ 推奨環境: iOS / Android / PC<br/>
+                      ※ 基本プレイ無料（一部課金あり）
+                  </p>
+                </div>
+              </section>
+
+              {/* Footer */}
+              <footer className="bg-gray-950 text-gray-500 py-12 border-t border-gray-900">
+                <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+                  <div className="text-center md:text-left">
+                    <span className="font-bold text-2xl text-white mb-2 block tracking-tight">AI<span className="text-pink-600">Kareshi</span></span>
+                    <p className="text-sm text-gray-400 mb-2">あなただけのパートナーを、その手に。</p>
+                    <p className="text-xs text-gray-600 font-bold border border-gray-800 inline-block px-2 py-1 rounded">
+                        Presented by Hello-ABC
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-8 text-sm">
+                    <button 
+                      onClick={() => setIsTermsOpen(true)}
+                      className="hover:text-white transition-colors text-left"
+                    >
+                      利用規約
+                    </button>
+                    <button 
+                      onClick={() => setIsPrivacyOpen(true)}
+                      className="hover:text-white transition-colors text-left"
+                    >
+                      プライバシーポリシー
+                    </button>
+                    <button 
+                      onClick={() => setIsTokuteiOpen(true)}
+                      className="hover:text-white transition-colors text-left"
+                    >
+                      特定商取引法に基づく表記
+                    </button>
+                    <button 
+                      onClick={() => setIsContactOpen(true)}
+                      className="hover:text-white transition-colors text-left"
+                    >
+                      お問い合わせ
+                    </button>
+                  </div>
+                  <div className="flex flex-col items-center md:items-end gap-1">
+                      <div className="text-xs text-gray-600">
+                        &copy; 2024 Hello-ABC Inc. All rights reserved.
+                      </div>
+                  </div>
+                </div>
+              </footer>
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
