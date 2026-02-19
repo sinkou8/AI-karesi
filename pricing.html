@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>料金プラン - AI彼氏</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #f8fafc; color: #333; }
+        .check-icon { color: #10b981; flex-shrink: 0; margin-top: 4px; }
+        .premium-check-icon { color: #ec4899; flex-shrink: 0; margin-top: 4px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- 閉じるボタン（ブラウザのタブを閉じる動作はJSで制限されることがありますが、UIとして配置） -->
+    <div class="absolute top-4 right-4 cursor-pointer text-gray-400 hover:text-gray-600" onclick="window.close()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </div>
+
+    <div class="text-center mb-8 mt-8 md:mt-0">
+        <h1 class="text-2xl md:text-3xl font-bold mb-2">料金プラン</h1>
+        <p class="text-sm text-gray-500">あなたのスタイルに合わせて選べる2つのプラン</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 w-full max-w-4xl">
+        
+        <!-- フリープラン -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden relative flex flex-col">
+            <div class="bg-gray-600 text-white text-xs font-bold text-center py-1.5 absolute top-0 w-full">
+                まずは、彼との相性をチェック
+            </div>
+            
+            <div class="p-6 pt-10 flex-grow flex flex-col">
+                <div class="flex items-baseline mb-1">
+                    <span class="text-2xl mr-2">🩶</span>
+                    <h2 class="text-xl font-bold text-gray-800">フリープラン</h2>
+                </div>
+                
+                <div class="mt-4 mb-6">
+                    <span class="text-4xl font-bold text-gray-900">¥0</span>
+                    <span class="text-gray-500 font-bold ml-1">/ 3日間</span>
+                    <span class="ml-2 inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded border border-gray-300 font-bold align-middle">
+                        3日間限定
+                    </span>
+                </div>
+
+                <ul class="space-y-4 mb-8 flex-grow">
+                    <li class="flex items-start"><svg class="w-5 h-5 check-icon mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="text-sm">彼との日常トーク体験</span></li>
+                    <li class="flex items-start"><svg class="w-5 h-5 check-icon mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="text-sm">やさしい距離感の会話</span></li>
+                    <li class="flex items-start"><svg class="w-5 h-5 check-icon mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="text-sm">相性チェック</span></li>
+                    <li class="flex items-start"><svg class="w-5 h-5 check-icon mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="text-sm font-bold text-gray-700">まずは“お試し恋人時間”</span></li>
+                </ul>
+
+                <div class="text-xs text-gray-400 mb-4 bg-gray-50 p-2 rounded">
+                    ※3日後は自動で通常プランへ切替はありません（安心設計）
+                </div>
+
+                <!-- LINEリンク -->
+                <a href="https://lin.ee/MfVZMJ2" class="block w-full py-3 rounded-full border-2 border-gray-800 text-gray-800 font-bold hover:bg-gray-50 transition-colors text-center no-underline">
+                    【3日間、無料で体験する】
+                </a>
+            </div>
+        </div>
+
+        <!-- 恋人コース -->
+        <div class="bg-white rounded-2xl shadow-xl border-2 border-pink-100 overflow-hidden relative flex flex-col transform md:-translate-y-2">
+            <div class="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs font-bold text-center py-1.5 absolute top-0 w-full">
+                彼だけの特別を、あなたに。
+            </div>
+
+            <div class="p-6 pt-10 flex-grow flex flex-col">
+                <div class="flex items-baseline mb-1">
+                    <span class="text-2xl mr-2">💎</span>
+                    <h2 class="text-xl font-bold text-pink-600">恋人コース</h2>
+                </div>
+
+                <div class="mt-4 mb-6">
+                    <span class="text-4xl font-bold text-gray-900">¥3,280</span>
+                    <span class="text-gray-500 font-bold ml-1">/ 月</span>
+                </div>
+
+                <ul class="space-y-4 mb-8 flex-grow">
+                    <li class="flex items-start"><svg class="w-5 h-5 premium-check-icon mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="text-sm font-medium">あなただけの恋人モード解放</span></li>
+                    <li class="flex items-start"><svg class="w-5 h-5 premium-check-icon mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="text-sm">おやすみ前の特別メッセージ</span></li>
+                    <li class="flex items-start"><svg class="w-5 h-5 premium-check-icon mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="text-sm">名前を呼ぶ、距離ゼロの会話</span></li>
+                    <li class="flex items-start"><svg class="w-5 h-5 premium-check-icon mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="text-sm">会話無制限</span></li>
+                    <li class="flex items-start"><svg class="w-5 h-5 premium-check-icon mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span class="text-sm bg-pink-50 p-1 rounded -ml-1">💫 彼からの“恋愛占い”アドバイス（月数回）</span></li>
+                </ul>
+
+                <div class="text-xs text-pink-400 mb-4 p-2">
+                    ※あなたの悩みに合わせた恋愛運・相性・未来予測メッセージ
+                </div>
+
+                <!-- 決済リンク -->
+                <a href="https://univa.cc/6Ya_5o" class="block w-full py-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-center no-underline">
+                    【彼だけの特別になる】
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
