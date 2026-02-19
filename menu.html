@@ -104,14 +104,9 @@
                 </div>
             </div>
 
-            <!-- 2. 右上: キャラを選ぶ -->
+            <!-- 2. 右上: キャラを選ぶ (テキスト削除版) -->
             <div class="tile corner-triangle border border-gray-200 relative overflow-hidden group p-0">
                 <div class="absolute inset-0 grid grid-cols-4 grid-rows-3 gap-1 p-1 opacity-70 transition-opacity group-hover:opacity-90">
-                    
-                    <!-- 
-                        ★修正完了★
-                        GitHubにある日本語ファイル名(.png)を正しく読み込める形式にしました。
-                    -->
                     
                     <!-- 1. 海堂カイ.png -->
                     <img src="./%E6%B5%B7%E5%A0%82%E3%82%AB%E3%82%A4.png" class="w-full h-full object-cover rounded bg-red-50" alt="海堂カイ">
@@ -151,13 +146,9 @@
                     
                 </div>
                 
-                <div class="absolute inset-0 bg-white/40 backdrop-blur-[1px]"></div>
-                <div class="relative z-10 bg-white/95 px-3 py-2 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    <span class="text-gray-700 font-bold text-sm leading-none whitespace-nowrap">キャラを選ぶ</span>
-                </div>
+                <!-- テキスト視認性向上のための薄い白オーバーレイ (文字を消したので少し薄くしました) -->
+                <div class="absolute inset-0 bg-white/20 backdrop-blur-[1px]"></div>
+
             </div>
 
             <!-- 3. 恋人コースとは -->
