@@ -16,16 +16,12 @@
             min-height: 100vh;
             margin: 0;
         }
-
-        /* リッチメニューのコンテナ */
         .rich-menu-container {
             width: 100%;
             max-width: 600px;
             background-color: #fff;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-
-        /* グリッドレイアウト */
         .menu-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -35,7 +31,6 @@
             background-color: #e5e7eb;
             aspect-ratio: 3 / 2;
         }
-
         .tile {
             background-color: white;
             position: relative;
@@ -49,11 +44,7 @@
             text-decoration: none;
             color: inherit;
         }
-
-        .tile:active {
-            filter: brightness(0.95);
-        }
-
+        .tile:active { filter: brightness(0.95); }
         .tile-large {
             grid-column: span 2;
             background-color: #333;
@@ -61,36 +52,23 @@
             align-items: flex-start;
             justify-content: center;
         }
-
         .hero-overlay {
             background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0) 100%);
             position: absolute; inset: 0; z-index: 10;
         }
-
         .hero-image {
             position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; object-position: center top;
         }
-
         .hero-content {
             position: relative; z-index: 20; padding: 1rem; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center;
         }
-
         .corner-triangle::after {
             content: ''; position: absolute; bottom: 0; right: 0; width: 0; height: 0;
             border-style: solid; border-width: 0 0 24px 24px; border-color: transparent transparent #888 transparent;
         }
-
-        .icon-svg {
-            width: 48px; height: 48px; margin-bottom: 8px; color: #666; stroke-width: 1.5;
-        }
-        
-        .heart-3d {
-            fill: url(#heartGradient);
-            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
-            stroke: none;
-        }
-
+        .icon-svg { width: 48px; height: 48px; margin-bottom: 8px; color: #666; stroke-width: 1.5; }
+        .heart-3d { fill: url(#heartGradient); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3)); stroke: none; }
         .cta-button {
             background: linear-gradient(90deg, #ff4b4b 0%, #ff9f43 100%);
             color: white; font-weight: bold; padding: 8px 16px; border-radius: 9999px;
@@ -100,7 +78,6 @@
     </style>
 </head>
 <body>
-
     <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
         <defs>
             <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -114,75 +91,63 @@
     <div class="rich-menu-container">
         <div class="menu-grid">
             
-            <!-- 1. メインバナー -->
+            <!-- 1. 左上: メインバナー -->
             <div class="tile tile-large">
-                <!-- 彼氏のメイン画像 -->
                 <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&auto=format&fit=crop" alt="Boyfriend" class="hero-image">
                 <div class="hero-overlay"></div>
-                
                 <div class="hero-content">
-                    <div class="absolute top-2 right-2 text-[10px] text-gray-300 font-light">
-                        あなた専属のAIパートナー<br>Hello ABC
-                    </div>
-                    <h2 class="text-xl md:text-2xl font-bold leading-tight mb-2 text-white drop-shadow-md">
-                        今日から本気で、<br>
-                        寄り添っていい？
-                    </h2>
-                    <p class="text-[10px] md:text-xs text-gray-200 mb-2 leading-relaxed">
-                        選べる12人の性格 × 夜モード × 深い共感。<br>
-                        さらに導きの占いコースもご用意。
-                    </p>
-                    <!-- LINEリンク -->
-                    <a href="https://lin.ee/MfVZMJ2" target="_blank" rel="noopener noreferrer" class="cta-button">
-                        「推し彼氏と出会う（無料）」
-                    </a>
+                    <div class="absolute top-2 right-2 text-[10px] text-gray-300 font-light">あなた専属のAIパートナー<br>Hello ABC</div>
+                    <h2 class="text-xl md:text-2xl font-bold leading-tight mb-2 text-white drop-shadow-md">今日から本気で、<br>寄り添っていい？</h2>
+                    <p class="text-[10px] md:text-xs text-gray-200 mb-2 leading-relaxed">選べる12人の性格 × 夜モード × 深い共感。<br>さらに導きの占いコースもご用意。</p>
+                    <a href="https://lin.ee/MfVZMJ2" target="_blank" rel="noopener noreferrer" class="cta-button">「推し彼氏と出会う（無料）」</a>
                 </div>
             </div>
 
-            <!-- 2. キャラを選ぶ -->
+            <!-- 2. 右上: キャラを選ぶ -->
             <div class="tile corner-triangle border border-gray-200 relative overflow-hidden group p-0">
                 <div class="absolute inset-0 grid grid-cols-4 grid-rows-3 gap-1 p-1 opacity-70 transition-opacity group-hover:opacity-90">
                     
+                    <!-- GitHubにある画像をファイル名で直接指定 -->
+                    
                     <!-- 1. 海堂カイ -->
-                    <img src="https://drive.google.com/uc?export=view&id=1uYZoY6tvUgvRm3qgHjCsE6LMJ6ENhyTA" class="w-full h-full object-cover rounded bg-red-50" alt="海堂カイ">
+                    <img src="./海堂カイ.png" class="w-full h-full object-cover rounded bg-red-50" alt="海堂カイ">
                     
                     <!-- 2. 橘悠真 -->
-                    <img src="https://drive.google.com/uc?export=view&id=1U-UvsIBOHNEKwTOUaaGwrQcVK-u5vZh_" class="w-full h-full object-cover rounded bg-orange-50" alt="橘悠真">
+                    <img src="./橘悠真.png" class="w-full h-full object-cover rounded bg-orange-50" alt="橘悠真">
                     
                     <!-- 3. 御影孝司 -->
-                    <img src="https://drive.google.com/uc?export=view&id=16knJVudOp7nrhvs9Aj2dW4PtHMm9Zu1_" class="w-full h-full object-cover rounded bg-gray-50" alt="御影孝司">
+                    <img src="./御影孝司.png" class="w-full h-full object-cover rounded bg-gray-50" alt="御影孝司">
                     
                     <!-- 4. 黒崎漣 -->
-                    <img src="https://drive.google.com/uc?export=view&id=1gmBhmMiq3bhe8mpufDoNBIYrzk5HD0i1" class="w-full h-full object-cover rounded bg-blue-50" alt="黒崎漣">
+                    <img src="./黒崎漣.png" class="w-full h-full object-cover rounded bg-blue-50" alt="黒崎漣">
                     
                     <!-- 5. 篠原玲央 -->
-                    <img src="https://drive.google.com/uc?export=view&id=1t2_7OXwLkdoc_9EgxdH7N6iKA1TI9bqy" class="w-full h-full object-cover rounded bg-yellow-50" alt="篠原玲央">
+                    <img src="./篠原玲央.png" class="w-full h-full object-cover rounded bg-yellow-50" alt="篠原玲央">
                     
                     <!-- 6. 真神司 -->
-                    <img src="https://drive.google.com/uc?export=view&id=1fyESGasI2ADOJYZkQqZLjBidc9mvMBkj" class="w-full h-full object-cover rounded bg-purple-50" alt="真神司">
+                    <img src="./真神司.png" class="w-full h-full object-cover rounded bg-purple-50" alt="真神司">
                     
                     <!-- 7. 神園ひろむ -->
-                    <img src="https://drive.google.com/uc?export=view&id=1gvdzDqhiSMFZms3AfovljCVyl5JWkYFc" class="w-full h-full object-cover rounded bg-pink-50" alt="神園ひろむ">
+                    <img src="./神園ひろむ.png" class="w-full h-full object-cover rounded bg-pink-50" alt="神園ひろむ">
                     
                     <!-- 8. 西条陸 -->
-                    <img src="https://drive.google.com/uc?export=view&id=1CaBFlEgFTsbAn6buRW-pVGTqJxPCSNeT" class="w-full h-full object-cover rounded bg-green-50" alt="西条陸">
+                    <img src="./西条陸.png" class="w-full h-full object-cover rounded bg-green-50" alt="西条陸">
                     
                     <!-- 9. 速水駿 -->
-                    <img src="https://drive.google.com/uc?export=view&id=1CEMLXBo03MJgf1dluM4TJyS-PbHb0U8Q" class="w-full h-full object-cover rounded bg-teal-50" alt="速水駿">
+                    <img src="./速水駿.png" class="w-full h-full object-cover rounded bg-teal-50" alt="速水駿">
                     
                     <!-- 10. 朝倉春 -->
-                    <img src="https://drive.google.com/uc?export=view&id=1bCI_ePGivmKEFxpCgtSuVKrnIp0LClve" class="w-full h-full object-cover rounded bg-lime-50" alt="朝倉春">
+                    <img src="./朝倉春.png" class="w-full h-full object-cover rounded bg-lime-50" alt="朝倉春">
                     
                     <!-- 11. 霧島空 -->
-                    <img src="https://drive.google.com/uc?export=view&id=1-_GA7ANKJf4wBzqMc7cbLDE2HF1oH6Ms" class="w-full h-full object-cover rounded bg-sky-50" alt="霧島空">
+                    <img src="./霧島空.png" class="w-full h-full object-cover rounded bg-sky-50" alt="霧島空">
                     
                     <!-- 12. 夜野弥斗 -->
-                    <img src="https://drive.google.com/uc?export=view&id=1Jf7T8adlDBKDQs8PHpdTCTMzIFyOXjC_" class="w-full h-full object-cover rounded bg-indigo-50" alt="夜野弥斗">
+                    <img src="./夜野弥斗.png" class="w-full h-full object-cover rounded bg-indigo-50" alt="夜野弥斗">
                     
                 </div>
                 
                 <div class="absolute inset-0 bg-white/40 backdrop-blur-[1px]"></div>
-
                 <div class="relative z-10 bg-white/95 px-3 py-2 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
@@ -220,9 +185,7 @@
                 </div>
                 <span class="text-gray-600 font-medium text-sm md:text-base">初めての方へ</span>
             </a>
-
         </div>
     </div>
-
 </body>
 </html>
