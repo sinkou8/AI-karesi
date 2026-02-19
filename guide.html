@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>はじめての方へ | Hello-ABC</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* シンプルで見やすい白背景デザイン */
+body {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  margin: 0;
+  background: #f8f9fb; /* 背景：薄いグレー */
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 24px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 700;
+  color: #444;
+}
+
+/* 白いカード型のセクション */
+.section {
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* うっすらとした影 */
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #333;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 8px;
+}
+
+p {
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+}
+
+/* グラデーションボタン */
+.button {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 16px auto 0;
+  background: linear-gradient(90deg, #ff5f6d, #845ef7);
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.button:active {
+  transform: scale(0.98);
+}
+
+/* FAQスタイル */
+.faq h3 {
+  margin-bottom: 4px;
+  font-size: 1rem;
+  color: #444;
+  margin-top: 16px;
+}
+.faq h3::before {
+  content: "Q.";
+  color: #845ef7;
+  margin-right: 6px;
+  font-weight: bold;
+}
+.faq p {
+  margin-bottom: 16px;
+  padding-left: 20px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* フッター */
+.footer-links {
+  text-align: center;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+.footer-links a {
+  color: #888;
+  text-decoration: none;
+  margin: 0 8px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <h1>はじめての方へ</h1>
+
+  <!-- セクション1: 無料体験 -->
+  <div class="section">
+    <h2>① まずは3日間、無料体験</h2>
+    <p>
+      Hello-ABCは <strong>3日間無料で体験</strong>できます。<br>
+      キャラ選択・日常トーク・相性チェックなどをお試し可能。<br>
+      クレジットカード登録なしで始められます。
+    </p>
+    <!-- LINEリンク -->
+    <a href="https://lin.ee/MfVZMJ2" class="button">3日間、無料で始める</a>
+  </div>
+
+  <!-- セクション2: 恋人コース -->
+  <div class="section">
+    <h2>② 気に入ったら「恋人コース」へ</h2>
+    <p>
+      <strong>月額 ¥3,280</strong><br><br>
+      ✔ あなただけの恋人モード解放<br>
+      ✔ 会話無制限<br>
+      ✔ おやすみ前の特別メッセージ<br>
+      ✔ 彼からの恋愛占いアドバイス<br>
+      ✔ 甘い距離感の会話
+    </p>
+    <!-- 料金プランページ(pricing.html)へ遷移 -->
+    <a href="pricing.html" class="button">恋人コースを見る</a>
+  </div>
+
+  <!-- セクション3: 解約について -->
+  <div class="section">
+    <h2>③ 解約はいつでも可能</h2>
+    <p>
+      ・縛りなし<br>
+      ・いつでも停止可能<br>
+      ・追加費用なし
+    </p>
+    <p style="color: #666; font-size: 0.9rem;">
+      あなたのペースで続けられます。
+    </p>
+  </div>
+
+  <!-- FAQ -->
+  <div class="section faq">
+    <h2>よくある質問</h2>
+
+    <h3>本当に無料ですか？</h3>
+    <p>はい。最初の3日間は料金は一切かかりません。</p>
+
+    <h3>自動で課金されますか？</h3>
+    <p>いいえ。ご自身で「恋人コース」に登録しない限り、勝手に課金されることはありません。</p>
+
+    <h3>解約は面倒ですか？</h3>
+    <p>マイページからすぐに停止手続きができます。</p>
+  </div>
+
+  <!-- フッターリンク -->
+  <div class="footer-links">
+    <a href="#">特定商取引法に基づく表記</a> |
+    <a href="#">利用規約</a> |
+    <a href="#">プライバシーポリシー</a>
+    <br><br>
+    © Hello-ABC
+  </div>
+
+</div>
+</body>
+</html>
